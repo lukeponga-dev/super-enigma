@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Products | JS-Free Marketplace{% endblock %}
+
+{% block content %}
+    <div class="admin-layout">
+        <div class="admin-sidebar">
+            <div class="admin-menu">
+                <div class="admin-menu-header">
+                    Admin Panel
+                </div>
+                <ul>
+                    <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+                    <li><a href="{{ url_for('admin_products') }}" class="active">Products</a></li>
+                    <li><a href="{{ url_for('admin_users') }}">Users</a></li>
+                    <li><a href="{{ url_for('admin_orders') }}">Orders</a></li>
+                    <li><a href="{{ url_for('admin_logs') }}">Activity Logs</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="admin-content">
+            <h1>Product Management</h1>
+            <p>Review, approve, or reject products listed by vendors.</p>
+
+            <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-bottom: 2rem;">
+                <h3>Filter Products</h3>
+                <form action="{{ url_for('admin_products') }}" method="get" style="box-shadow: none; padding: 0; margin: 1rem 0 0 0;">
+                    <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">
+                        <div style="flex: 1; min-width: 150px;">
+                            <label for="status">Status</label>
+                            <select id="status" name="status">
+                                <option value="all" {% if current_status == 'all' %}selected{% endif %}>All</option>
+                                <option value="pending" {% if current_status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="approved" {% if current_status == 'approved' %}selected{% endif %}>Approved</option>
+                                <option value="rejected" {% if current_status == 'rejected' %}selected{% endif %}>Rejected</option>
+                            </select>
+                        </div>
+
+                        <div style="flex: 1; min-width: 150px;">
+                            <label for="sort_by">Sort By</label>
+                            <select id="sort_by" name="sort_by">
+                                <option value="created_at" {% if current_sort == 'created_at' %}selected{% endif %}>Date Added</option>
+                                <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Name</option>
+                                <option value="price" {% if current_sort == 'price' %}selected{% endif %}>Price</option>
+                            </select>
+                        </div>
+
+                        <div style="flex: 1; min-width: 150px;">
+                            <label for="order">Order</label>
+                            <select id="order" name="order">
+                                <option value="desc" {% if current_order == 'desc' %}selected{% endif %}>Descending</option>
+                                <option value="asc" {% if current_order == 'asc' %}selected{% endif %}>Ascending</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <input type="submit" value="Apply Filters">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            {% if products %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Vendor</th>
+                            <th>Price</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Date Added</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                            <tr>
+                                <td>{{ product.id }}</td>
+                                <td>
+                                    <img src="{{ product.image }}" alt="{{ product.name }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 3px;">
+                                </td>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.vendor }}</td>
+                                <td>${{ "%.2f"|format(product.price) }}</td>
+                                <td>{{ product.category }}</td>
+                                <td>
+                                    {% if product.status == 'approved' %}
+                                        <span class="status-tag status-approved">Approved</span>
+                                    {% elif product.status == 'pending' %}
+                                        <span class="status-tag status-pending">Pending</span>
+                                    {% elif product.status == 'rejected' %}
+                                        <span class="status-tag status-rejected">Rejected</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ product.created_at }}</td>
+                                <td>
+                                    <form action="{{ url_for('admin_product_detail', product_id=product.id) }}" method="get" style="margin: 0; padding: 0; box-shadow: none;">
+                                        <input type="submit" value="Review" style="width: 100%; margin-bottom: 0.5rem;">
+                                    </form>
+
+                                    {% if product.status == 'pending' %}
+                                        <form action="{{ url_for('admin_product_detail', product_id=product.id) }}" method="post" style="margin: 0; padding: 0; box-shadow: none;">
+                                            <input type="hidden" name="action" value="approve">
+                                            <input type="submit" value="Approve" style="width: 100%; background-color: #28a745; margin-bottom: 0.5rem;">
+                                        </form>
+
+                                        <form action="{{ url_for('admin_product_detail', product_id=product.id) }}" method="post" style="margin: 0; padding: 0; box-shadow: none;">
+                                            <input type="hidden" name="action" value="reject">
+                                            <input type="submit" value="Reject" style="width: 100%; background-color: #dc3545;">
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div style="text-align: center; padding: 2rem; background-color: white; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                    <p>No products found matching your criteria.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

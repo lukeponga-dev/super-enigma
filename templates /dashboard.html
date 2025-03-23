@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Vendor Dashboard | JS-Free Marketplace{% endblock %}
+
+{% block content %}
+    <h1>Vendor Dashboard</h1>
+    <p>Welcome, {{ session.name }}! Manage your products and orders here.</p>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 2rem; margin-top: 2rem;">
+        <div style="flex: 1; min-width: 300px;">
+            <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                <h2>Quick Actions</h2>
+                <div style="margin-top: 1rem;">
+                    <form action="{{ url_for('add_product') }}" method="get">
+                        <input type="submit" value="Add New Product">
+                    </form>
+                </div>
+            </div>
+
+            <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-top: 1.5rem;">
+                <h2>Sales Statistics</h2>
+                <div style="margin-top: 1rem;">
+                    <table>
+                        <tr>
+                            <th>Total Orders</th>
+                            <td>{{ orders|length }}</td>
+                        </tr>
+                        <tr>
+                            <th>Total Revenue</th>
+                            <td>${{ "%.2f"|format(orders|sum(attribute='total')) if orders else '0.00' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Pending Orders</th>
+                            <td>{{ orders|selectattr('status', 'equalto', 'Pending')|list|length }}</td>
+                        </tr>
+                        <tr>
+                            <th>Funds in Escrow</th>
+                            <td>${{ "%.2f"|format(escrows|selectattr('status', 'equalto', 'in_escrow')|sum(attribute='amount')) if escrows else '0.00' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Released Funds</th>
+                            <td>${{ "%.2f"|format(escrows|selectattr('status', 'equalto', 'released')|sum(attribute='amount')) if escrows else '0.00' }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div style="flex: 2; min-width: 500px;">
+            <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                <h2>Recent Orders</h2>
+
+                {% if orders %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Escrow Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                                <tr>
+                                    <td>{{ order.id[:8] }}</td>
+                                    <td>{{ order.created_at }}</td>
+                                    <td>{{ order.user_email }}</td>
+                                    <td>${{ "%.2f"|format(order.total) }}</td>
+                                    <td>
+                                        <span style="background-color: {% if order.status == 'Pending' %}#ffc107; color: #212529{% elif order.status == 'Shipped' %}#17a2b8; color: white{% elif order.status == 'Completed' %}#28a745; color: white{% else %}#6c757d; color: white{% endif %}; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.8rem;">
+                                            {{ order.status }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% set order_escrow = escrows|selectattr('order_id', 'equalto', order.id)|first %}
+                                        {% if order_escrow %}
+                                            <span style="background-color: {% if order_escrow.status == 'awaiting_payment' %}#ffc107; color: #212529{% elif order_escrow.status == 'in_escrow' %}#17a2b8; color: white{% elif order_escrow.status == 'released' %}#28a745; color: white{% elif order_escrow.status == 'disputed' %}#dc3545; color: white{% else %}#6c757d; color: white{% endif %}; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.8rem;">
+                                                {{ order_escrow.status|replace('_', ' ')|capitalize }}
+                                            </span>
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <form action="#" method="get">
+                                            <input type="hidden" name="order_id" value="{{ order.id }}">
+                                            <input type="submit" value="View Details" style="background-color: #17a2b8;">
+                                        </form>
+                                        {% if order_escrow %}
+                                            <form action="{{ url_for('escrow_detail', escrow_id=order_escrow.id) }}" method="get" style="margin-top: 0.5rem;">
+                                                <input type="submit" value="Escrow" style="background-color: #6c757d;">
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No orders yet.</p>
+                {% endif %}
+            </div>
+
+            <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-top: 1.5rem;">
+                <h2>Your Products</h2>
+
+                {% set vendor_products = products|selectattr('vendor', 'equalto', session.name)|list %}
+
+                {% if vendor_products %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in vendor_products %}
+                                <tr>
+                                    <td>{{ product.id }}</td>
+                                    <td>{{ product.name }}</td>
+                                    <td>{{ product.category }}</td>
+                                    <td>${{ "%.2f"|format(product.price) }}</td>
+                                    <td>
+                                        <span style="background-color: {% if product.status == 'pending' %}#ffc107; color: #212529{% elif product.status == 'approved' %}#28a745; color: white{% else %}#dc3545; color: white{% endif %}; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.8rem;">
+                                            {{ product.status|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <form action="{{ url_for('product_detail', product_id=product.id) }}" method="get" style="display: inline;">
+                                            <input type="submit" value="View" style="background-color: #17a2b8;">
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No products yet. <a href="{{ url_for('add_product') }}">Add your first product</a>.</p>
+                {% endif %}
+            </div>
+
+            <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-top: 1.5rem;">
+                <h2>Escrow Status</h2>
+
+                {% if escrows %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Last Updated</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for escrow in escrows %}
+                                <tr>
+                                    <td>{{ escrow.order_id[:8] }}</td>
+                                    <td>${{ "%.2f"|format(escrow.amount) }}</td>
+                                    <td>
+                                        <span style="background-color: {% if escrow.status == 'awaiting_payment' %}#ffc107; color: #212529{% elif escrow.status == 'in_escrow' %}#17a2b8; color: white{% elif escrow.status == 'released' %}#28a745; color: white{% elif escrow.status == 'disputed' %}#dc3545; color: white{% else %}#6c757d; color: white{% endif %}; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.8rem;">
+                                            {{ escrow.status|replace('_', ' ')|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>{{ escrow.created_at }}</td>
+                                    <td>{{ escrow.updated_at }}</td>
+                                    <td>
+                                        <form action="{{ url_for('escrow_detail', escrow_id=escrow.id) }}" method="get">
+                                            <input type="submit" value="View" style="background-color: #17a2b8;">
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No escrows yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

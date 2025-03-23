@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Product Review | JS-Free Marketplace{% endblock %}
+
+{% block content %}
+    <div class="admin-layout">
+        <div class="admin-sidebar">
+            <div class="admin-menu">
+                <div class="admin-menu-header">
+                    Admin Panel
+                </div>
+                <ul>
+                    <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+                    <li><a href="{{ url_for('admin_products') }}" class="active">Products</a></li>
+                    <li><a href="{{ url_for('admin_users') }}">Users</a></li>
+                    <li><a href="{{ url_for('admin_orders') }}">Orders</a></li>
+                    <li><a href="{{ url_for('admin_logs') }}">Activity Logs</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="admin-content">
+            <div style="margin-bottom: 1rem;">
+                <form action="{{ url_for('admin_products') }}" method="get" style="margin: 0; padding: 0; box-shadow: none; display: inline-block;">
+                    <input type="submit" value="← Back to Products" style="background-color: #6c757d;">
+                </form>
+            </div>
+
+            <h1>Product Review</h1>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 2rem; margin: 2rem 0;">
+                <div style="flex: 1; min-width: 300px;">
+                    <img src="{{ product.image }}" alt="{{ product.name }}" style="width: 100%; border-radius: 5px; margin-bottom: 1rem;">
+
+                    <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                        <h3>Product Information</h3>
+                        <table style="margin-top: 1rem;">
+                            <tr>
+                                <th>Product ID</th>
+                                <td>{{ product.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Vendor</th>
+                                <td>{{ product.vendor }}</td>
+                            </tr>
+                            <tr>
+                                <th>Category</th>
+                                <td>{{ product.category }}</td>
+                            </tr>
+                            <tr>
+                                <th>Date Added</th>
+                                <td>{{ product.created_at }}</td>
+                            </tr>
+                            <tr>
+                                <th>Status</th>
+                                <td>
+                                    {% if product.status == 'approved' %}
+                                        <span class="status-tag status-approved">Approved</span>
+                                    {% elif product.status == 'pending' %}
+                                        <span class="status-tag status-pending">Pending</span>
+                                    {% elif product.status == 'rejected' %}
+                                        <span class="status-tag status-rejected">Rejected</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div style="flex: 2; min-width: 400px;">
+                    <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                        <h2>{{ product.name }}</h2>
+                        <div style="font-size: 1.5rem; color: #28a745; margin: 1rem 0;">${{ "%.2f"|format(product.price) }}</div>
+
+                        <h3>Description</h3>
+                        <div style="margin: 1rem 0; line-height: 1.6;">
+                            <p>{{ product.description }}</p>
+                        </div>
+
+                        {% if product.status == 'pending' %}
+                            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #eee;">
+                                <h3>Moderation Actions</h3>
+
+                                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                                    <form action="{{ url_for('admin_product_detail', product_id=product.id) }}" method="post" style="margin: 0; padding: 0; box-shadow: none; flex: 1;">
+                                        <input type="hidden" name="action" value="approve">
+                                        <input type="submit" value="Approve Product" style="width: 100%; background-color: #28a745;">
+                                    </form>
+
+                                    <form action="{{ url_for('admin_product_detail', product_id=product.id) }}" method="post" style="margin: 0; padding: 0; box-shadow: none; flex: 1;">
+                                        <input type="hidden" name="action" value="reject">
+                                        <input type="submit" value="Reject Product" style="width: 100%; background-color: #dc3545;">
+                                    </form>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-top: 1.5rem;">
+                        <h3>Moderation Guidelines</h3>
+                        <ul style="margin: 1rem 0 1rem 1.5rem;">
+                            <li>Ensure the product name and description are accurate and clear</li>
+                            <li>Verify that the product is relevant to cryptocurrency and blockchain</li>
+                            <li>Check for any misleading claims or prohibited items</li>
+                            <li>Ensure the price is reasonable and not deceptive</li>
+                            <li>Validate that the vendor has a good track record</li>
+                        </ul>
+
+                        <div style="padding: 1rem; background-color: #f8f9fa; border-radius: 5px; margin-top: 1rem;">
+                            <p><strong>Note:</strong> Once approved, the product will be visible to all users on the marketplace. Rejected products will remain in the database but won't be displayed to regular users.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

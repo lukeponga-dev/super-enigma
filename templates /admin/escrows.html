@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Escrows | JS-Free Marketplace{% endblock %}
+
+{% block content %}
+    <div class="admin-layout">
+        <div class="admin-sidebar">
+            <div class="admin-menu">
+                <div class="admin-menu-header">
+                    Admin Panel
+                </div>
+                <ul>
+                    <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+                    <li><a href="{{ url_for('admin_products') }}">Products</a></li>
+                    <li><a href="{{ url_for('admin_users') }}">Users</a></li>
+                    <li><a href="{{ url_for('admin_orders') }}">Orders</a></li>
+                    <li><a href="{{ url_for('admin_escrows') }}" class="active">Escrows</a></li>
+                    <li><a href="{{ url_for('admin_logs') }}">Activity Logs</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="admin-content">
+            <h1>Escrow Management</h1>
+            <p>Manage and monitor all escrow transactions in the marketplace.</p>
+
+            <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-top: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2 style="margin: 0;">Escrow Transactions</h2>
+
+                    <div>
+                        <form action="{{ url_for('admin_escrows') }}" method="get" style="margin: 0; padding: 0; box-shadow: none; display: flex; gap: 0.5rem;">
+                            <select name="status" style="padding: 0.5rem; border: 1px solid #ced4da; border-radius: 0.25rem;">
+                                <option value="all" {% if current_status == 'all' %}selected{% endif %}>All Statuses</option>
+                                <option value="awaiting_payment" {% if current_status == 'awaiting_payment' %}selected{% endif %}>Awaiting Payment</option>
+                                <option value="in_escrow" {% if current_status == 'in_escrow' %}selected{% endif %}>In Escrow</option>
+                                <option value="released" {% if current_status == 'released' %}selected{% endif %}>Released</option>
+                                <option value="disputed" {% if current_status == 'disputed' %}selected{% endif %}>Disputed</option>
+                                <option value="refunded" {% if current_status == 'refunded' %}selected{% endif %}>Refunded</option>
+                            </select>
+                            <input type="submit" value="Filter" style="background-color: #6c757d;">
+                        </form>
+                    </div>
+                </div>
+
+                {% if escrow_details %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Escrow ID</th>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Last Updated</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for detail in escrow_details %}
+                                <tr>
+                                    <td>{{ detail.escrow.id[:8] }}</td>
+                                    <td>{{ detail.order.id[:8] }}</td>
+                                    <td>{{ detail.order.user_email }}</td>
+                                    <td>${{ "%.2f"|format(detail.escrow.amount) }}</td>
+                                    <td>
+                                        <span class="status-tag {% if detail.escrow.status == 'awaiting_payment' %}status-pending{% elif detail.escrow.status == 'in_escrow' %}status-in-progress{% elif detail.escrow.status == 'released' %}status-approved{% elif detail.escrow.status == 'disputed' %}status-rejected{% else %}status-inactive{% endif %}">
+                                            {{ detail.escrow.status|replace('_', ' ')|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>{{ detail.escrow.created_at }}</td>
+                                    <td>{{ detail.escrow.updated_at }}</td>
+                                    <td>
+                                        <form action="{{ url_for('admin_escrow_detail', escrow_id=detail.escrow.id) }}" method="get" style="margin: 0; padding: 0; box-shadow: none;">
+                                            <input type="submit" value="Manage" style="background-color: #17a2b8;">
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div style="text-align: center; padding: 2rem;">
+                        <p>No escrow transactions found with the selected filters.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-top: 1.5rem;">
+                <h2>Escrow Statistics</h2>
+                <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
+                    <div style="flex: 1; min-width: 180px; background-color: #f8f9fa; padding: 1rem; border-radius: 5px; text-align: center;">
+                        <h3 style="margin-top: 0;">Total Escrows</h3>
+                        <p style="font-size: 2rem; margin: 0.5rem 0;">{{ escrow_details|length }}</p>
+                    </div>
+                    <div style="flex: 1; min-width: 180px; background-color: #fff3cd; padding: 1rem; border-radius: 5px; text-align: center;">
+                        <h3 style="margin-top: 0;">Awaiting Payment</h3>
+                        <p style="font-size: 2rem; margin: 0.5rem 0;">{{ escrow_details|selectattr('escrow.status', 'equalto', 'awaiting_payment')|list|length }}</p>
+                    </div>
+                    <div style="flex: 1; min-width: 180px; background-color: #d1ecf1; padding: 1rem; border-radius: 5px; text-align: center;">
+                        <h3 style="margin-top: 0;">In Escrow</h3>
+                        <p style="font-size: 2rem; margin: 0.5rem 0;">{{ escrow_details|selectattr('escrow.status', 'equalto', 'in_escrow')|list|length }}</p>
+                    </div>
+                    <div style="flex: 1; min-width: 180px; background-color: #d4edda; padding: 1rem; border-radius: 5px; text-align: center;">
+                        <h3 style="margin-top: 0;">Released</h3>
+                        <p style="font-size: 2rem; margin: 0.5rem 0;">{{ escrow_details|selectattr('escrow.status', 'equalto', 'released')|list|length }}</p>
+                    </div>
+                    <div style="flex: 1; min-width: 180px; background-color: #f8d7da; padding: 1rem; border-radius: 5px; text-align: center;">
+                        <h3 style="margin-top: 0;">Disputed</h3>
+                        <p style="font-size: 2rem; margin: 0.5rem 0;">{{ escrow_details|selectattr('escrow.status', 'equalto', 'disputed')|list|length }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

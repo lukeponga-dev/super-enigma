@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Order Confirmation | JS-Free Marketplace{% endblock %}
+
+{% block content %}
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1>Order Confirmation</h1>
+        <p>Thank you for your order!</p>
+    </div>
+
+    <div style="background-color: white; padding: 2rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+            <div>
+                <h3>Order #{{ order.id[:8] }}</h3>
+                <p>Date: {{ order.created_at }}</p>
+            </div>
+            <div>
+                <h3>Status: <span style="color: #ffc107;">{{ order.status }}</span></h3>
+            </div>
+        </div>
+
+        <h3>Order Items</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order_items %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>${{ "%.2f"|format(item.price) }}</td>
+                        <td>${{ "%.2f"|format(item.subtotal) }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="3">Total</th>
+                    <th>${{ "%.2f"|format(order.total) }}</th>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div style="margin-top: 2rem;">
+            <div style="display: flex; flex-wrap: wrap; gap: 2rem;">
+                <div style="flex: 1; min-width: 300px;">
+                    <h3>Shipping Address</h3>
+                    <div style="background-color: #f8f9fa; padding: 1rem; border-radius: 5px;">
+                        <p style="white-space: pre-line;">{{ order.shipping_address }}</p>
+                    </div>
+                </div>
+
+                <div style="flex: 1; min-width: 300px;">
+                    <h3>Payment Information</h3>
+                    <div style="background-color: #f8f9fa; padding: 1rem; border-radius: 5px;">
+                        <p><strong>Payment Status:</strong> {{ order.escrow_status|replace('_', ' ')|capitalize }}</p>
+                        <p><strong>Your Wallet Address:</strong> {{ order.payment_address }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem; padding: 1rem; background-color: #fff3cd; border-radius: 5px; border: 1px solid #ffeeba;">
+            <h3>Escrow Payment Instructions</h3>
+            <p>Please send the exact amount of ${{ "%.2f"|format(order.total) }} in cryptocurrency to the escrow address below:</p>
+            <div style="background-color: #f8f9fa; padding: 0.5rem; margin: 0.5rem 0; border-radius: 3px; font-family: monospace; word-break: break-all;">
+                {{ escrow.escrow_address }}
+            </div>
+            <p><strong>Important:</strong> Your order will be processed once payment is confirmed in the escrow. You will release the funds from escrow after receiving and verifying your order.</p>
+
+            <div style="margin-top: 1rem;">
+                <a href="{{ url_for('escrow_detail', escrow_id=escrow.id) }}" style="display: inline-block; padding: 0.5rem 1rem; background-color: #28a745; color: white; text-decoration: none; border-radius: 3px;">View Escrow Details</a>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: flex; justify-content: center; margin-top: 2rem;">
+        <form action="{{ url_for('home') }}" method="get">
+            <input type="submit" value="Continue Shopping">
+        </form>
+    </div>
+{% endblock %}

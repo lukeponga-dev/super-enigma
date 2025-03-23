@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Dispute | JS-Free Marketplace{% endblock %}
+
+{% block content %}
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1>Submit Escrow Dispute</h1>
+        <p>Order #{{ order.id[:8] }}</p>
+    </div>
+
+    <div style="background-color: white; padding: 2rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+        <div style="margin-bottom: 2rem;">
+            <h3>Escrow Information</h3>
+            <table>
+                <tr>
+                    <th>Amount:</th>
+                    <td>${{ "%.2f"|format(escrow.amount) }}</td>
+                </tr>
+                <tr>
+                    <th>Status:</th>
+                    <td>{{ escrow.status|capitalize }}</td>
+                </tr>
+                <tr>
+                    <th>Created:</th>
+                    <td>{{ escrow.created_at }}</td>
+                </tr>
+                {% if escrow.funded_at %}
+                <tr>
+                    <th>Funded:</th>
+                    <td>{{ escrow.funded_at }}</td>
+                </tr>
+                {% endif %}
+            </table>
+        </div>
+
+        <div style="margin-top: 2rem; margin-bottom: 2rem;">
+            <div style="background-color: #fff3cd; padding: 1rem; border-radius: 5px; border: 1px solid #ffeeba; margin-bottom: 1.5rem;">
+                <h4 style="color: #856404; margin-top: 0;">Important Information</h4>
+                <ul style="margin-bottom: 0;">
+                    <li>Only submit a dispute if there's a legitimate issue with your order.</li>
+                    <li>Be specific about the problem and include any relevant details.</li>
+                    <li>Once submitted, a marketplace admin will review your dispute.</li>
+                    <li>The admin may contact both you and the seller for more information.</li>
+                    <li>Falsely claiming issues may result in account restrictions.</li>
+                </ul>
+            </div>
+
+            <form action="{{ url_for('dispute_escrow', escrow_id=escrow.id) }}" method="post">
+                <div class="form-group">
+                    <label for="dispute_reason">Reason for Dispute:</label>
+                    <textarea id="dispute_reason" name="dispute_reason" rows="5" required placeholder="Please describe your issue in detail. What went wrong? What resolution are you seeking?"></textarea>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <input type="submit" value="Submit Dispute" style="background-color: #dc3545;">
+                    <a href="{{ url_for('escrow_detail', escrow_id=escrow.id) }}" style="display: inline-block; padding: 0.5rem 1rem; background-color: #6c757d; color: white; text-decoration: none; border-radius: 3px; border: none; cursor: pointer; text-align: center;">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

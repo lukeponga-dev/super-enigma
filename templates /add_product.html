@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Add Product | JS-Free Marketplace{% endblock %}
+
+{% block content %}
+    <h1>Add New Product</h1>
+
+    <div style="max-width: 800px; margin: 0 auto;">
+        <form action="{{ url_for('add_product') }}" method="post">
+            <div class="form-group">
+                <label for="name">Product Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="price">Price (USD):</label>
+                <input type="number" id="price" name="price" step="0.01" min="0.01" required>
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <select id="category" name="category" required>
+                    <option value="">-- Select Category --</option>
+                    <option value="Hardware">Hardware</option>
+                    <option value="Books">Books</option>
+                    <option value="Software">Software</option>
+                    <option value="Mining">Mining Equipment</option>
+                    <option value="Accessories">Accessories</option>
+                    <option value="Services">Services</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" rows="5" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="image_url">Image URL:</label>
+                <input type="url" id="image_url" name="image_url" required>
+                <small style="display: block; margin-top: 0.5rem; color: #666;">Provide a direct link to an image (https://...)</small>
+            </div>
+
+            <div style="display: flex; justify-content: space-between;">
+                <input type="submit" value="Add Product">
+
+                <form action="{{ url_for('dashboard') }}" method="get">
+                    <input type="submit" value="Cancel" style="background-color: #6c757d;">
+                </form>
+            </div>
+        </form>
+
+        <div style="margin-top: 2rem; padding: 1rem; background-color: #f8f9fa; border-radius: 5px;">
+            <h3>Tips for Good Product Listings</h3>
+            <ul style="margin-left: 1.5rem;">
+                <li>Use clear, descriptive product names</li>
+                <li>Provide detailed information in the description</li>
+                <li>Use high-quality images</li>
+                <li>Be accurate with pricing and category selection</li>
+                <li>Include all relevant specifications and features</li>
+            </ul>
+        </div>
+    </div>
+{% endblock %}

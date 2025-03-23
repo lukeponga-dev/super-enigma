@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} | JS-Free Marketplace{% endblock %}
+
+{% block content %}
+    <div class="product-detail">
+        <div style="display: flex; flex-wrap: wrap; gap: 2rem; margin-bottom: 2rem;">
+            <div style="flex: 1; min-width: 300px;">
+                <img src="{{ product.image }}" alt="{{ product.name }}" style="width: 100%; border-radius: 5px;">
+            </div>
+
+            <div style="flex: 2; min-width: 300px;">
+                <h1>{{ product.name }}</h1>
+                <div class="product-price">${{ "%.2f"|format(product.price) }}</div>
+                <div style="margin: 1rem 0;">
+                    <strong>Category:</strong> {{ product.category }}
+                </div>
+                <div style="margin: 1rem 0;">
+                    <strong>Vendor:</strong> {{ product.vendor }}
+                </div>
+                <div style="margin: 1rem 0; line-height: 1.6;">
+                    <p>{{ product.description }}</p>
+                </div>
+
+                <form action="{{ url_for('add_to_cart') }}" method="post">
+                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                    <div class="form-group">
+                        <label for="quantity">Quantity:</label>
+                        <input type="number" id="quantity" name="quantity" value="1" min="1" max="10" style="width: 100px;">
+                    </div>
+                    <input type="submit" value="Add to Cart">
+                </form>
+
+                <form action="{{ url_for('home') }}" method="get" style="margin-top: 1rem;">
+                    <input type="submit" value="Back to Products" style="background-color: #6c757d;">
+                </form>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <h2>Product Details</h2>
+            <table>
+                <tr>
+                    <th>Product ID</th>
+                    <td>{{ product.id }}</td>
+                </tr>
+                <tr>
+                    <th>Name</th>
+                    <td>{{ product.name }}</td>
+                </tr>
+                <tr>
+                    <th>Price</th>
+                    <td>${{ "%.2f"|format(product.price) }}</td>
+                </tr>
+                <tr>
+                    <th>Category</th>
+                    <td>{{ product.category }}</td>
+                </tr>
+                <tr>
+                    <th>Vendor</th>
+                    <td>{{ product.vendor }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+{% endblock %}

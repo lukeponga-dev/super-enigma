@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Escrow Detail | JS-Free Marketplace{% endblock %}
+
+{% block content %}
+    <div class="admin-layout">
+        <div class="admin-sidebar">
+            <div class="admin-menu">
+                <div class="admin-menu-header">
+                    Admin Panel
+                </div>
+                <ul>
+                    <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+                    <li><a href="{{ url_for('admin_products') }}">Products</a></li>
+                    <li><a href="{{ url_for('admin_users') }}">Users</a></li>
+                    <li><a href="{{ url_for('admin_orders') }}">Orders</a></li>
+                    <li><a href="{{ url_for('admin_escrows') }}" class="active">Escrows</a></li>
+                    <li><a href="{{ url_for('admin_logs') }}">Activity Logs</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="admin-content">
+            <div style="margin-bottom: 1rem;">
+                <form action="{{ url_for('admin_escrows') }}" method="get" style="margin: 0; padding: 0; box-shadow: none; display: inline-block;">
+                    <input type="submit" value="← Back to Escrows" style="background-color: #6c757d;">
+                </form>
+            </div>
+
+            <h1>Escrow #{{ escrow.id[:8] }}</h1>
+            <p>Manage this escrow transaction and resolve any disputes.</p>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 2rem; margin: 2rem 0;">
+                <div style="flex: 1; min-width: 300px;">
+                    <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                        <h3>Escrow Information</h3>
+                        <table style="margin-top: 1rem;">
+                            <tr>
+                                <th>Escrow ID</th>
+                                <td>{{ escrow.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Order ID</th>
+                                <td>{{ order.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Customer</th>
+                                <td>{{ order.user_email }}</td>
+                            </tr>
+                            <tr>
+                                <th>Amount</th>
+                                <td>${{ "%.2f"|format(escrow.amount) }}</td>
+                            </tr>
+                            <tr>
+                                <th>Status</th>
+                                <td>
+                                    <span class="status-tag {% if escrow.status == 'awaiting_payment' %}status-pending{% elif escrow.status == 'in_escrow' %}status-in-progress{% elif escrow.status == 'released' %}status-approved{% elif escrow.status == 'disputed' %}status-rejected{% else %}status-inactive{% endif %}">
+                                        {{ escrow.status|replace('_', ' ')|capitalize }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Created</th>
+                                <td>{{ escrow.created_at }}</td>
+                            </tr>
+                            {% if escrow.funded_at %}
+                            <tr>
+                                <th>Funded</th>
+                                <td>{{ escrow.funded_at }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if escrow.released_at %}
+                            <tr>
+                                <th>Released</th>
+                                <td>{{ escrow.released_at }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <th>Escrow Address</th>
+                                <td style="word-break: break-all; font-family: monospace;">{{ escrow.escrow_address }}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-top: 1.5rem;">
+                        <h3>Order Information</h3>
+                        <table style="margin-top: 1rem;">
+                            <tr>
+                                <th>Order Status</th>
+                                <td>
+                                    <span class="status-tag {% if order.status == 'Pending' %}status-pending{% elif order.status == 'Shipped' %}status-in-progress{% elif order.status == 'Completed' %}status-approved{% else %}status-rejected{% endif %}">
+                                        {{ order.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Order Date</th>
+                                <td>{{ order.created_at }}</td>
+                            </tr>
+                            <tr>
+                                <th>Order Total</th>
+                                <td>${{ "%.2f"|format(order.total) }}</td>
+                            </tr>
+                        </table>
+
+                        <div style="margin-top: 1rem;">
+                            <form action="{{ url_for('admin_order_detail', order_id=order.id) }}" method="get" style="margin: 0; padding: 0; box-shadow: none;">
+                                <input type="submit" value="View Full Order Details" style="background-color: #17a2b8;">
+                            </form>
+                        </div>
+                    </div>
+
+                    {% if escrow.dispute_reason %}
+                    <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-top: 1.5rem; border-left: 4px solid #dc3545;">
+                        <h3>Dispute Information</h3>
+                        <div style="margin-top: 1rem;">
+                            <p><strong>Dispute Reason:</strong></p>
+                            <div style="background-color: #f8f9fa; padding: 1rem; border-radius: 5px; margin-top: 0.5rem;">
+                                <p style="white-space: pre-line;">{{ escrow.dispute_reason }}</p>
+                            </div>
+
+                            {% if escrow.dispute_resolved_at %}
+                            <p style="margin-top: 1rem;"><strong>Resolved on:</strong> {{ escrow.dispute_resolved_at }}</p>
+                            {% else %}
+                            <p style="margin-top: 1rem; color: #dc3545;"><strong>Status:</strong> Pending resolution</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div style="flex: 2; min-width: 400px;">
+                    <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                        <h3>Order Items</h3>
+                        <table style="margin-top: 1rem;">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Vendor</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order_items %}
+                                    <tr>
+                                        <td>{{ item.name }}</td>
+                                        <td>{{ item.vendor }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>${{ "%.2f"|format(item.price) }}</td>
+                                        <td>${{ "%.2f"|format(item.subtotal) }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="4">Total</th>
+                                    <th>${{ "%.2f"|format(order.total) }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-top: 1.5rem;">
+                        <h3>Admin Actions</h3>
+                        <p style="margin-bottom: 1rem;">Manage this escrow and resolve any disputes between the buyer and seller.</p>
+
+                        {% if escrow.status == 'in_escrow' or escrow.status == 'disputed' %}
+                            <form action="{{ url_for('admin_escrow_detail', escrow_id=escrow.id) }}" method="post" style="margin-bottom: 1.5rem; padding: 0; box-shadow: none;">
+                                <div class="form-group">
+                                    <label for="admin_notes">Admin Notes</label>
+                                    <textarea id="admin_notes" name="admin_notes" rows="3" placeholder="Add notes about this escrow transaction...">{{ escrow.admin_notes or '' }}</textarea>
+                                </div>
+
+                                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                                    <button type="submit" name="action" value="release" style="flex: 1; padding: 0.5rem 1rem; background-color: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                                        Release Funds to Seller
+                                    </button>
+                                    <button type="submit" name="action" value="refund" style="flex: 1; padding: 0.5rem 1rem; background-color: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                                        Refund to Buyer
+                                    </button>
+                                </div>
+                            </form>
+                        {% else %}
+                            <div style="background-color: #f8f9fa; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
+                                {% if escrow.status == 'awaiting_payment' %}
+                                    <p>This escrow is awaiting payment from the buyer. No admin action required at this time.</p>
+                                {% elif escrow.status == 'released' %}
+                                    <p>This escrow has been released to the seller. Transaction is complete.</p>
+                                    {% if escrow.admin_notes %}
+                                        <p style="margin-top: 0.5rem;"><strong>Admin Notes:</strong></p>
+                                        <p style="white-space: pre-line;">{{ escrow.admin_notes }}</p>
+                                    {% endif %}
+                                {% elif escrow.status == 'refunded' %}
+                                    <p>This escrow has been refunded to the buyer. Transaction is canceled.</p>
+                                    {% if escrow.admin_notes %}
+                                        <p style="margin-top: 0.5rem;"><strong>Admin Notes:</strong></p>
+                                        <p style="white-space: pre-line;">{{ escrow.admin_notes }}</p>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                        <div style="border-top: 1px solid #eee; padding-top: 1.5rem; margin-top: 1.5rem;">
+                            <h4>Timeline</h4>
+                            <ul style="list-style-type: none; padding-left: 0; margin-top: 1rem;">
+                                <li style="position: relative; padding-left: 1.5rem; padding-bottom: 1.5rem; border-left: 2px solid #dee2e6;">
+                                    <div style="position: absolute; left: -0.5rem; width: 1rem; height: 1rem; background-color: #17a2b8; border-radius: 50%;"></div>
+                                    <div style="margin-left: 1rem;">
+                                        <p style="margin: 0; font-weight: bold;">Escrow Created</p>
+                                        <p style="margin: 0; font-size: 0.9rem; color: #6c757d;">{{ escrow.created_at }}</p>
+                                    </div>
+                                </li>
+                                {% if escrow.funded_at %}
+                                <li style="position: relative; padding-left: 1.5rem; padding-bottom: 1.5rem; border-left: 2px solid #dee2e6;">
+                                    <div style="position: absolute; left: -0.5rem; width: 1rem; height: 1rem; background-color: #ffc107; border-radius: 50%;"></div>
+                                    <div style="margin-left: 1rem;">
+                                        <p style="margin: 0; font-weight: bold;">Payment Received</p>
+                                        <p style="margin: 0; font-size: 0.9rem; color: #6c757d;">{{ escrow.funded_at }}</p>
+                                    </div>
+                                </li>
+                                {% endif %}
+                                {% if escrow.status == 'disputed' %}
+                                <li style="position: relative; padding-left: 1.5rem; padding-bottom: 1.5rem; border-left: 2px solid #dee2e6;">
+                                    <div style="position: absolute; left: -0.5rem; width: 1rem; height: 1rem; background-color: #dc3545; border-radius: 50%;"></div>
+                                    <div style="margin-left: 1rem;">
+                                        <p style="margin: 0; font-weight: bold;">Dispute Opened</p>
+                                        <p style="margin: 0; font-size: 0.9rem; color: #6c757d;">{{ escrow.updated_at }}</p>
+                                    </div>
+                                </li>
+                                {% endif %}
+                                {% if escrow.released_at %}
+                                <li style="position: relative; padding-left: 1.5rem; padding-bottom: 1.5rem; border-left: 2px solid #dee2e6;">
+                                    <div style="position: absolute; left: -0.5rem; width: 1rem; height: 1rem; background-color: #28a745; border-radius: 50%;"></div>
+                                    <div style="margin-left: 1rem;">
+                                        <p style="margin: 0; font-weight: bold;">Funds Released</p>
+                                        <p style="margin: 0; font-size: 0.9rem; color: #6c757d;">{{ escrow.released_at }}</p>
+                                    </div>
+                                </li>
+                                {% endif %}
+                                {% if escrow.dispute_resolved_at %}
+                                <li style="position: relative; padding-left: 1.5rem; border-left: 2px solid transparent;">
+                                    <div style="position: absolute; left: -0.5rem; width: 1rem; height: 1rem; background-color: #6c757d; border-radius: 50%;"></div>
+                                    <div style="margin-left: 1rem;">
+                                        <p style="margin: 0; font-weight: bold;">Dispute Resolved</p>
+                                        <p style="margin: 0; font-size: 0.9rem; color: #6c757d;">{{ escrow.dispute_resolved_at }}</p>
+                                    </div>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

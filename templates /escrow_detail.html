@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Escrow Detail | JS-Free Marketplace{% endblock %}
+
+{% block content %}
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1>Escrow Details</h1>
+        <p>Order #{{ order.id[:8] }}</p>
+    </div>
+
+    <div style="background-color: white; padding: 2rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+            <div>
+                <h3>Escrow Status</h3>
+                <div style="margin-top: 0.5rem;">
+                    {% if escrow.status == 'awaiting_payment' %}
+                        <span style="background-color: #ffc107; color: #212529; padding: 0.25rem 0.5rem; border-radius: 3px; font-weight: bold;">Awaiting Payment</span>
+                    {% elif escrow.status == 'in_escrow' %}
+                        <span style="background-color: #17a2b8; color: white; padding: 0.25rem 0.5rem; border-radius: 3px; font-weight: bold;">In Escrow</span>
+                    {% elif escrow.status == 'released' %}
+                        <span style="background-color: #28a745; color: white; padding: 0.25rem 0.5rem; border-radius: 3px; font-weight: bold;">Released</span>
+                    {% elif escrow.status == 'disputed' %}
+                        <span style="background-color: #dc3545; color: white; padding: 0.25rem 0.5rem; border-radius: 3px; font-weight: bold;">Disputed</span>
+                    {% elif escrow.status == 'refunded' %}
+                        <span style="background-color: #6c757d; color: white; padding: 0.25rem 0.5rem; border-radius: 3px; font-weight: bold;">Refunded</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div>
+                <h3>Order Status</h3>
+                <div style="margin-top: 0.5rem;">
+                    <span style="background-color: {% if order.status == 'Pending' %}#ffc107{% elif order.status == 'Shipped' %}#17a2b8{% elif order.status == 'Completed' %}#28a745{% else %}#6c757d{% endif %}; color: {% if order.status == 'Pending' %}#212529{% else %}white{% endif %}; padding: 0.25rem 0.5rem; border-radius: 3px; font-weight: bold;">{{ order.status }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <h3>Escrow Information</h3>
+            <table>
+                <tr>
+                    <th>Escrow ID:</th>
+                    <td>{{ escrow.id }}</td>
+                </tr>
+                <tr>
+                    <th>Amount:</th>
+                    <td>${{ "%.2f"|format(escrow.amount) }}</td>
+                </tr>
+                <tr>
+                    <th>Escrow Address:</th>
+                    <td style="font-family: monospace; word-break: break-all;">{{ escrow.escrow_address }}</td>
+                </tr>
+                <tr>
+                    <th>Created:</th>
+                    <td>{{ escrow.created_at }}</td>
+                </tr>
+                {% if escrow.funded_at %}
+                <tr>
+                    <th>Funded:</th>
+                    <td>{{ escrow.funded_at }}</td>
+                </tr>
+                {% endif %}
+                {% if escrow.released_at %}
+                <tr>
+                    <th>Released:</th>
+                    <td>{{ escrow.released_at }}</td>
+                </tr>
+                {% endif %}
+                {% if escrow.dispute_reason %}
+                <tr>
+                    <th>Dispute Reason:</th>
+                    <td>{{ escrow.dispute_reason }}</td>
+                </tr>
+                {% endif %}
+                {% if escrow.dispute_resolved_at %}
+                <tr>
+                    <th>Dispute Resolved:</th>
+                    <td>{{ escrow.dispute_resolved_at }}</td>
+                </tr>
+                {% endif %}
+            </table>
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <h3>Order Items</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Vendor</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order_items %}
+                        <tr>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.vendor }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>${{ "%.2f"|format(item.price) }}</td>
+                            <td>${{ "%.2f"|format(item.subtotal) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="4">Total</th>
+                        <th>${{ "%.2f"|format(order.total) }}</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <h3>Shipping Address</h3>
+            <div style="background-color: #f8f9fa; padding: 1rem; border-radius: 5px;">
+                <p style="white-space: pre-line;">{{ order.shipping_address }}</p>
+            </div>
+        </div>
+
+        {% if is_buyer %}
+            <div style="margin-top: 2rem; padding: 1.5rem; background-color: #f8f9fa; border-radius: 5px;">
+                <h3>Buyer Actions</h3>
+
+                {% if escrow.status == 'awaiting_payment' %}
+                    <div style="margin-bottom: 1rem;">
+                        <p>Please send the exact amount of ${{ "%.2f"|format(escrow.amount) }} to the escrow address above.</p>
+                        <p>After sending the payment, you can simulate the payment confirmation below:</p>
+                        <form action="{{ url_for('simulate_payment', escrow_id=escrow.id) }}" method="post" style="margin-top: 1rem;">
+                            <input type="submit" value="Simulate Payment Confirmation" style="background-color: #28a745;">
+                        </form>
+                    </div>
+                {% elif escrow.status == 'in_escrow' %}
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <form action="{{ url_for('release_escrow', escrow_id=escrow.id) }}" method="post">
+                            <input type="submit" value="Release Funds to Seller" style="background-color: #28a745;">
+                        </form>
+                        <form action="{{ url_for('dispute_escrow', escrow_id=escrow.id) }}" method="get">
+                            <input type="submit" value="Open Dispute" style="background-color: #dc3545;">
+                        </form>
+                    </div>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem; color: #6c757d;">
+                        <strong>Note:</strong> Release funds once you've received your order and are satisfied with it.
+                        If there are any issues, open a dispute for marketplace admin assistance.
+                    </p>
+                {% elif escrow.status == 'disputed' %}
+                    <p>Your dispute is currently under review by the marketplace admins.</p>
+                    <p><strong>Dispute reason:</strong> {{ escrow.dispute_reason }}</p>
+                {% elif escrow.status == 'released' %}
+                    <p>You have released the funds to the seller. This transaction is complete.</p>
+                {% elif escrow.status == 'refunded' %}
+                    <p>This transaction has been refunded. Funds have been returned to your account.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if is_seller %}
+            <div style="margin-top: 2rem; padding: 1.5rem; background-color: #f8f9fa; border-radius: 5px;">
+                <h3>Seller Information</h3>
+
+                {% if escrow.status == 'awaiting_payment' %}
+                    <p>Waiting for buyer to send payment to the escrow address.</p>
+                {% elif escrow.status == 'in_escrow' %}
+                    <p>Payment is in escrow. Ship the product to the buyer's shipping address.</p>
+                    <p>The funds will be released once the buyer confirms receipt of the product.</p>
+                {% elif escrow.status == 'disputed' %}
+                    <p>This transaction is currently under dispute. The marketplace admin will review and make a decision.</p>
+                    <p><strong>Dispute reason:</strong> {{ escrow.dispute_reason }}</p>
+                {% elif escrow.status == 'released' %}
+                    <p>The buyer has released the funds. This transaction is complete.</p>
+                {% elif escrow.status == 'refunded' %}
+                    <p>This transaction has been refunded to the buyer.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    <div style="display: flex; justify-content: center; margin-top: 2rem;">
+        <form action="{{ url_for('dashboard') }}" method="get">
+            <input type="submit" value="Back to Dashboard" style="background-color: #6c757d;">
+        </form>
+    </div>
+{% endblock %}

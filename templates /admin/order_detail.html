@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Order Detail | JS-Free Marketplace{% endblock %}
+
+{% block content %}
+    <div class="admin-layout">
+        <div class="admin-sidebar">
+            <div class="admin-menu">
+                <div class="admin-menu-header">
+                    Admin Panel
+                </div>
+                <ul>
+                    <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+                    <li><a href="{{ url_for('admin_products') }}">Products</a></li>
+                    <li><a href="{{ url_for('admin_users') }}">Users</a></li>
+                    <li><a href="{{ url_for('admin_orders') }}" class="active">Orders</a></li>
+                    <li><a href="{{ url_for('admin_escrows') }}">Escrows</a></li>
+                    <li><a href="{{ url_for('admin_logs') }}">Activity Logs</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="admin-content">
+            <div style="margin-bottom: 1rem;">
+                <form action="{{ url_for('admin_orders') }}" method="get" style="margin: 0; padding: 0; box-shadow: none; display: inline-block;">
+                    <input type="submit" value="← Back to Orders" style="background-color: #6c757d;">
+                </form>
+            </div>
+
+            <h1>Order #{{ order.id[:8] }}</h1>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 2rem; margin: 2rem 0;">
+                <div style="flex: 1; min-width: 300px;">
+                    <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                        <h3>Order Information</h3>
+                        <table style="margin-top: 1rem;">
+                            <tr>
+                                <th>Order ID</th>
+                                <td>{{ order.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Customer</th>
+                                <td>{{ order.user_email }}</td>
+                            </tr>
+                            <tr>
+                                <th>Date</th>
+                                <td>{{ order.created_at }}</td>
+                            </tr>
+                            <tr>
+                                <th>Status</th>
+                                <td>
+                                    {% if order.status == 'Pending' %}
+                                        <span class="status-tag status-pending">{{ order.status }}</span>
+                                    {% elif order.status == 'Shipped' %}
+                                        <span class="status-tag status-approved">{{ order.status }}</span>
+                                    {% elif order.status == 'Completed' %}
+                                        <span class="status-tag status-approved">{{ order.status }}</span>
+                                    {% elif order.status == 'Cancelled' %}
+                                        <span class="status-tag status-rejected">{{ order.status }}</span>
+                                    {% else %}
+                                        <span class="status-tag status-pending">{{ order.status }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Total</th>
+                                <td>${{ "%.2f"|format(order.total) }}</td>
+                            </tr>
+                            <tr>
+                                <th>Escrow Status</th>
+                                <td>
+                                    {% if escrow %}
+                                        <span class="status-tag {% if escrow.status == 'awaiting_payment' %}status-pending{% elif escrow.status == 'in_escrow' %}status-in-progress{% elif escrow.status == 'released' %}status-approved{% elif escrow.status == 'disputed' %}status-rejected{% else %}status-inactive{% endif %}">
+                                            {{ escrow.status|replace('_', ' ')|capitalize }}
+                                        </span>
+                                    {% else %}
+                                        <span class="status-tag status-inactive">No Escrow</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-top: 1.5rem;">
+                        <h3>Shipping Address</h3>
+                        <div style="background-color: #f8f9fa; padding: 1rem; border-radius: 5px; margin-top: 1rem;">
+                            <p style="white-space: pre-line;">{{ order.shipping_address }}</p>
+                        </div>
+                    </div>
+
+                    <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-top: 1.5rem;">
+                        <h3>Payment Information</h3>
+                        <table style="margin-top: 1rem;">
+                            <tr>
+                                <th>Payment Status</th>
+                                <td>
+                                    {% if escrow %}
+                                        <span class="status-tag {% if escrow.status == 'awaiting_payment' %}status-pending{% elif escrow.status == 'in_escrow' or escrow.status == 'disputed' %}status-in-progress{% elif escrow.status == 'released' %}status-approved{% else %}status-rejected{% endif %}">
+                                            {{ escrow.status|replace('_', ' ')|capitalize }}
+                                        </span>
+                                    {% else %}
+                                        <span class="status-tag status-approved">Paid</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Payment Method</th>
+                                <td>Cryptocurrency</td>
+                            </tr>
+                            <tr>
+                                <th>Customer Wallet</th>
+                                <td style="word-break: break-all;">{{ order.payment_address }}</td>
+                            </tr>
+                            {% if escrow %}
+                            <tr>
+                                <th>Escrow Address</th>
+                                <td style="word-break: break-all; font-family: monospace;">{{ escrow.escrow_address }}</td>
+                            </tr>
+                            {% endif %}
+                        </table>
+
+                        {% if escrow %}
+                            <div style="margin-top: 1rem;">
+                                <form action="{{ url_for('admin_escrow_detail', escrow_id=escrow.id) }}" method="get" style="margin: 0; padding: 0; box-shadow: none;">
+                                    <input type="submit" value="Manage Escrow" style="background-color: #17a2b8;">
+                                </form>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div style="flex: 2; min-width: 400px;">
+                    <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                        <h3>Order Items</h3>
+                        <table style="margin-top: 1rem;">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Vendor</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order_items %}
+                                    <tr>
+                                        <td>{{ item.name }}</td>
+                                        <td>{{ item.vendor }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>${{ "%.2f"|format(item.price) }}</td>
+                                        <td>${{ "%.2f"|format(item.subtotal) }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="4">Total</th>
+                                    <th>${{ "%.2f"|format(order.total) }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-top: 1.5rem;">
+                        <h3>Admin Actions</h3>
+                        <p style="margin-bottom: 1rem;">Manage the order status and handle issues.</p>
+
+                        <form action="#" method="post" style="margin-bottom: 1rem; padding: 0; box-shadow: none;">
+                            <div class="form-group">
+                                <label for="status">Update Order Status</label>
+                                <select id="status" name="status">
+                                    <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                    <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                                    <option value="Completed" {% if order.status == 'Completed' %}selected{% endif %}>Completed</option>
+                                    <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="admin_notes">Admin Notes</label>
+                                <textarea id="admin_notes" name="admin_notes" rows="3" placeholder="Add notes about this order..."></textarea>
+                            </div>
+
+                            <input type="submit" value="Update Order">
+                        </form>
+
+                        <div style="border-top: 1px solid #eee; padding-top: 1.5rem; margin-top: 1.5rem;">
+                            <h4>Dispute Resolution</h4>
+                            <p style="margin-bottom: 1rem;">If there's a dispute between the buyer and seller, you can take the following actions:</p>
+
+                            {% if escrow and (escrow.status == 'in_escrow' or escrow.status == 'disputed') %}
+                                <div style="display: flex; gap: 1rem;">
+                                    <form action="{{ url_for('admin_escrow_detail', escrow_id=escrow.id) }}" method="get" style="margin: 0; padding: 0; box-shadow: none; flex: 1;">
+                                        <input type="submit" value="Manage Escrow Dispute" style="width: 100%; background-color: #17a2b8;">
+                                    </form>
+                                </div>
+                            {% else %}
+                                <div style="background-color: #f8f9fa; padding: 1rem; border-radius: 5px;">
+                                    {% if not escrow %}
+                                        <p>No escrow associated with this order.</p>
+                                    {% elif escrow.status == 'awaiting_payment' %}
+                                        <p>Escrow is currently awaiting payment. No disputes can be opened yet.</p>
+                                    {% elif escrow.status == 'released' %}
+                                        <p>This transaction has been completed. Funds have been released to the seller.</p>
+                                    {% elif escrow.status == 'refunded' %}
+                                        <p>This transaction has been refunded to the buyer.</p>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

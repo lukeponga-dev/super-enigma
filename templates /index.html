@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS-Free Marketplace</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .note {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            margin-bottom: 20px;
+        }
+        .warning {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 20px;
+        }
+        .page-links {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-left: 4px solid #6c757d;
+            margin-bottom: 20px;
+        }
+        .page-links ul {
+            columns: 2;
+        }
+        code {
+            background-color: #f8f9fa;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        .features {
+            margin-top: 20px;
+        }
+        .features ul {
+            columns: 2;
+        }
+    </style>
+</head>
+<body>
+    <h1>JS-Free Marketplace Static Demo</h1>
+
+    <div class="note">
+        <h3>About This Application</h3>
+        <p>This is a Python Flask-based marketplace for cryptocurrency-related products, designed to function without client-side JavaScript. This static version demonstrates the UI templates but lacks backend functionality.</p>
+    </div>
+
+    <div class="features">
+        <h3>Application Features</h3>
+        <ul>
+            <li>User authentication (login/register)</li>
+            <li>Product listings and details</li>
+            <li>Shopping cart functionality</li>
+            <li>Checkout process</li>
+            <li>Order management</li>
+            <li>Admin dashboard</li>
+            <li>Vendor dashboard</li>
+            <li>Cryptocurrency payments</li>
+            <li>Escrow system</li>
+            <li>Activity logging</li>
+        </ul>
+    </div>
+
+    <div class="page-links">
+        <h3>Page Templates</h3>
+        <p>The following links represent the various pages in the application:</p>
+        <ul>
+            <li><a href="index.html">Home Page</a></li>
+            <li><a href="login.html">Login</a></li>
+            <li><a href="register.html">Register</a></li>
+            <li><a href="product_detail.html">Product Detail</a></li>
+            <li><a href="cart.html">Shopping Cart</a></li>
+            <li><a href="checkout.html">Checkout</a></li>
+            <li><a href="order_confirmation.html">Order Confirmation</a></li>
+            <li><a href="dashboard.html">User Dashboard</a></li>
+            <li><a href="add_product.html">Add Product</a></li>
+            <li><a href="admin/dashboard.html">Admin Dashboard</a></li>
+            <li><a href="admin/products.html">Admin Products</a></li>
+            <li><a href="admin/orders.html">Admin Orders</a></li>
+            <li><a href="admin/users.html">Admin Users</a></li>
+            <li><a href="admin/logs.html">Admin Logs</a></li>
+        </ul>
+        <p><strong>Note:</strong> In this static demo, these pages are displayed without dynamic content and form submission functionality.</p>
+    </div>
+
+    <div class="warning">
+        <h3>Backend Not Available</h3>
+        <p>The Python Flask backend that powers this marketplace is not available in this deployment. To fully deploy this application, consider using a platform that supports Python backends like:</p>
+        <ul>
+            <li>Heroku</li>
+            <li>AWS Elastic Beanstalk</li>
+            <li>Google App Engine</li>
+            <li>DigitalOcean App Platform</li>
+            <li>Render</li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <h2>Deployment Instructions</h2>
+        <p>Detailed deployment instructions can be found in the <code>README.md</code> file in the project repository.</p>
+        <p>Key steps include:</p>
+        <ol>
+            <li>Choose a platform that supports Python Flask applications</li>
+            <li>Set up a PostgreSQL database service</li>
+            <li>Configure environment variables</li>
+            <li>Deploy the Flask application</li>
+        </ol>
+    </div>
+</body>
+</html>

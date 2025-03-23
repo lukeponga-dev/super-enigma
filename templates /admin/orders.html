@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Orders | JS-Free Marketplace{% endblock %}
+
+{% block content %}
+    <div class="admin-layout">
+        <div class="admin-sidebar">
+            <div class="admin-menu">
+                <div class="admin-menu-header">
+                    Admin Panel
+                </div>
+                <ul>
+                    <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+                    <li><a href="{{ url_for('admin_products') }}">Products</a></li>
+                    <li><a href="{{ url_for('admin_users') }}">Users</a></li>
+                    <li><a href="{{ url_for('admin_orders') }}" class="active">Orders</a></li>
+                    <li><a href="{{ url_for('admin_logs') }}">Activity Logs</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="admin-content">
+            <h1>Order Management</h1>
+            <p>Monitor and manage marketplace orders.</p>
+
+            {% if orders %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr>
+                                <td>{{ order.id[:8] }}</td>
+                                <td>{{ order.user_email }}</td>
+                                <td>{{ order.created_at }}</td>
+                                <td>${{ "%.2f"|format(order.total) }}</td>
+                                <td>
+                                    {% if order.status == 'Pending' %}
+                                        <span class="status-tag status-pending">{{ order.status }}</span>
+                                    {% elif order.status == 'Shipped' %}
+                                        <span class="status-tag status-approved">{{ order.status }}</span>
+                                    {% elif order.status == 'Completed' %}
+                                        <span class="status-tag status-approved">{{ order.status }}</span>
+                                    {% elif order.status == 'Cancelled' %}
+                                        <span class="status-tag status-rejected">{{ order.status }}</span>
+                                    {% else %}
+                                        <span class="status-tag status-pending">{{ order.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form action="{{ url_for('admin_order_detail', order_id=order.id) }}" method="get" style="margin: 0; padding: 0; box-shadow: none;">
+                                        <input type="submit" value="View Details" style="background-color: #17a2b8;">
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div style="text-align: center; padding: 2rem; background-color: white; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                    <p>No orders found.</p>
+                </div>
+            {% endif %}
+
+            <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-top: 2rem;">
+                <h3>Order Processing Guidelines</h3>
+                <ul style="margin: 1rem 0 1rem 1.5rem; line-height: 1.6;">
+                    <li><strong>Pending</strong> - Payment has been received but order has not been shipped</li>
+                    <li><strong>Shipped</strong> - Order has been shipped to the customer</li>
+                    <li><strong>Completed</strong> - Order has been delivered and confirmed by the customer</li>
+                    <li><strong>Cancelled</strong> - Order has been cancelled and refunded</li>
+                </ul>
+
+                <div style="padding: 1rem; background-color: #f8f9fa; border-radius: 5px; margin-top: 1rem;">
+                    <p><strong>Dispute Resolution:</strong> If a dispute is opened by a customer or vendor, investigate the issue thoroughly before making a decision. Make sure to check order details, shipping information, and communication logs.</p>
+                </div>
+            </div>
+
+            <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-top: 2rem;">
+                <h3>Crypto Payment Verification</h3>
+                <p style="margin-bottom: 1rem;">In a production environment, this section would provide tools to verify cryptocurrency payments using blockchain APIs.</p>
+
+                <form action="#" method="get" style="box-shadow: none; padding: 0; margin: 0;">
+                    <div class="form-group">
+                        <label for="transaction_hash">Transaction Hash</label>
+                        <input type="text" id="transaction_hash" name="transaction_hash" placeholder="Enter blockchain transaction hash">
+                    </div>
+
+                    <input type="submit" value="Verify Transaction" style="background-color: #17a2b8;">
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

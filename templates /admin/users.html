@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Users | JS-Free Marketplace{% endblock %}
+
+{% block content %}
+    <div class="admin-layout">
+        <div class="admin-sidebar">
+            <div class="admin-menu">
+                <div class="admin-menu-header">
+                    Admin Panel
+                </div>
+                <ul>
+                    <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+                    <li><a href="{{ url_for('admin_products') }}">Products</a></li>
+                    <li><a href="{{ url_for('admin_users') }}" class="active">Users</a></li>
+                    <li><a href="{{ url_for('admin_orders') }}">Orders</a></li>
+                    <li><a href="{{ url_for('admin_logs') }}">Activity Logs</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="admin-content">
+            <h1>User Management</h1>
+            <p>View and manage user accounts on the marketplace.</p>
+
+            {% if users %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.name }}</td>
+                                <td>
+                                    {% if user.is_admin %}
+                                        <span class="admin-badge">Admin</span>
+                                    {% elif user.is_vendor %}
+                                        <span class="vendor-badge">Vendor</span>
+                                    {% else %}
+                                        Customer
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <!-- In a real application, these would be working forms for user management -->
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <form action="#" method="get" style="margin: 0; padding: 0; box-shadow: none;">
+                                            <input type="hidden" name="user_email" value="{{ user.email }}">
+                                            <input type="submit" value="View Details" style="background-color: #17a2b8;">
+                                        </form>
+
+                                        {% if not user.is_admin %}
+                                            <form action="#" method="post" style="margin: 0; padding: 0; box-shadow: none;">
+                                                <input type="hidden" name="user_email" value="{{ user.email }}">
+                                                <input type="hidden" name="action" value="suspend">
+                                                <input type="submit" value="Suspend" style="background-color: #ffc107; color: #333;">
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div style="text-align: center; padding: 2rem; background-color: white; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                    <p>No users found.</p>
+                </div>
+            {% endif %}
+
+            <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-top: 2rem;">
+                <h3>User Statistics</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 2rem; margin-top: 1rem;">
+                    <div>
+                        <h4>Total Users</h4>
+                        <p style="font-size: 1.5rem; font-weight: bold;">{{ users|length }}</p>
+                    </div>
+
+                    <div>
+                        <h4>Vendors</h4>
+                        <p style="font-size: 1.5rem; font-weight: bold;">{{ users|selectattr('is_vendor', 'equalto', true)|list|length }}</p>
+                    </div>
+
+                    <div>
+                        <h4>Admins</h4>
+                        <p style="font-size: 1.5rem; font-weight: bold;">{{ users|selectattr('is_admin', 'equalto', true)|list|length }}</p>
+                    </div>
+
+                    <div>
+                        <h4>Customers</h4>
+                        <p style="font-size: 1.5rem; font-weight: bold;">{{ users|rejectattr('is_vendor', 'equalto', true)|rejectattr('is_admin', 'equalto', true)|list|length }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-top: 2rem;">
+                <h3>Add New Admin (Demo)</h3>
+                <p style="margin-bottom: 1rem;">In a production environment, this would allow adding new administrators.</p>
+
+                <form action="#" method="post" style="box-shadow: none; padding: 0; margin: 0;">
+                    <div class="form-group">
+                        <label for="admin_email">User Email</label>
+                        <input type="email" id="admin_email" name="admin_email" required>
+                    </div>
+
+                    <input type="submit" value="Grant Admin Access">
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

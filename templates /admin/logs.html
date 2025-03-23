@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Activity Logs | JS-Free Marketplace{% endblock %}
+
+{% block content %}
+    <div class="admin-layout">
+        <div class="admin-sidebar">
+            <div class="admin-menu">
+                <div class="admin-menu-header">
+                    Admin Panel
+                </div>
+                <ul>
+                    <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+                    <li><a href="{{ url_for('admin_products') }}">Products</a></li>
+                    <li><a href="{{ url_for('admin_users') }}">Users</a></li>
+                    <li><a href="{{ url_for('admin_orders') }}">Orders</a></li>
+                    <li><a href="{{ url_for('admin_logs') }}" class="active">Activity Logs</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="admin-content">
+            <h1>Activity Logs</h1>
+            <p>Track all actions and events on the marketplace.</p>
+
+            <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-bottom: 2rem;">
+                <h3>Filter Logs</h3>
+                <form action="{{ url_for('admin_logs') }}" method="get" style="box-shadow: none; padding: 0; margin: 1rem 0 0 0;">
+                    <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label for="filter_user">User</label>
+                            <input type="text" id="filter_user" name="filter_user" placeholder="Filter by user email">
+                        </div>
+
+                        <div style="flex: 1; min-width: 200px;">
+                            <label for="filter_action">Action Type</label>
+                            <select id="filter_action" name="filter_action">
+                                <option value="">All Actions</option>
+                                <option value="product">Product Actions</option>
+                                <option value="user">User Actions</option>
+                                <option value="order">Order Actions</option>
+                            </select>
+                        </div>
+
+                        <div style="flex: 1; min-width: 200px;">
+                            <label for="filter_date">Date Range</label>
+                            <select id="filter_date" name="filter_date">
+                                <option value="all">All Time</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <input type="submit" value="Apply Filters">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            {% if logs %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>User</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                            <tr>
+                                <td>{{ log.timestamp }}</td>
+                                <td>{{ log.user }}</td>
+                                <td>{{ log.action }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div style="text-align: center; padding: 2rem; background-color: white; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                    <p>No activity logs found.</p>
+                </div>
+            {% endif %}
+
+            <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-top: 2rem;">
+                <h3>Export Logs</h3>
+                <p style="margin-bottom: 1rem;">In a production environment, this would allow exporting logs for archiving and analysis.</p>
+
+                <form action="#" method="get" style="box-shadow: none; padding: 0; margin: 0;">
+                    <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label for="export_format">Export Format</label>
+                            <select id="export_format" name="export_format">
+                                <option value="csv">CSV</option>
+                                <option value="json">JSON</option>
+                                <option value="pdf">PDF</option>
+                            </select>
+                        </div>
+
+                        <div style="flex: 1; min-width: 200px;">
+                            <label for="export_date_range">Date Range</label>
+                            <select id="export_date_range" name="export_date_range">
+                                <option value="all">All Time</option>
+                                <option value="day">Last 24 Hours</option>
+                                <option value="week">Last 7 Days</option>
+                                <option value="month">Last 30 Days</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <input type="submit" value="Export Logs" style="background-color: #17a2b8;">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div style="background-color: white; padding: 1.5rem; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-top: 2rem;">
+                <h3>Log Retention Policy</h3>
+                <ul style="margin: 1rem 0 1rem 1.5rem; line-height: 1.6;">
+                    <li>Activity logs are retained for 12 months</li>
+                    <li>Critical security events are retained for 3 years</li>
+                    <li>Logs containing personal information are anonymized after 6 months</li>
+                    <li>Regular backups are performed to ensure log integrity</li>
+                </ul>
+
+                <div style="padding: 1rem; background-color: #f8f9fa; border-radius: 5px; margin-top: 1rem;">
+                    <p><strong>Note:</strong> This log system complies with data protection regulations and maintains an immutable audit trail for security and compliance purposes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
