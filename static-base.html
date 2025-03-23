@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS-Free Marketplace</title>
+    <style>
+        /* CSS Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        /* Header */
+        header {
+            background-color: #24292e;
+            color: white;
+            padding: 1rem 0;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .logo a {
+            color: white;
+            text-decoration: none;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+        }
+
+        nav ul li {
+            margin-left: 1rem;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem;
+        }
+
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+
+        /* Admin badge */
+        .admin-badge {
+            background-color: #dc3545;
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            margin-left: 0.5rem;
+        }
+
+        /* Vendor badge */
+        .vendor-badge {
+            background-color: #28a745;
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            margin-left: 0.5rem;
+        }
+
+        /* Flash Messages */
+        .flash-messages {
+            margin: 1rem 0;
+        }
+
+        .flash {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+
+        /* Main Content */
+        main {
+            padding: 2rem 0;
+        }
+
+        h1, h2, h3 {
+            margin-bottom: 1rem;
+        }
+
+        /* Forms */
+        form {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        button,
+        input[type="submit"] {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        button:hover,
+        input[type="submit"]:hover {
+            background-color: #218838;
+        }
+
+        /* Product Cards */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-gap: 1.5rem;
+        }
+
+        .product-card {
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 1rem;
+        }
+
+        .product-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-price {
+            font-size: 1.2rem;
+            color: #28a745;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-description {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        /* Error Messages */
+        .error {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+        }
+
+        /* Status Tags */
+        .status-tag {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-approved {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-in-progress {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-inactive {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+
+        /* Admin Dashboard */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Admin sidebar */
+        .admin-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .admin-sidebar {
+            flex: 1;
+            min-width: 200px;
+            max-width: 300px;
+        }
+
+        .admin-content {
+            flex: 3;
+            min-width: 500px;
+        }
+
+        .admin-menu {
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .admin-menu-header {
+            background-color: #24292e;
+            color: white;
+            padding: 1rem;
+            font-weight: bold;
+        }
+
+        .admin-menu ul {
+            list-style: none;
+        }
+
+        .admin-menu ul li a {
+            display: block;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            color: #333;
+            border-bottom: 1px solid #eee;
+        }
+
+        .admin-menu ul li a:hover,
+        .admin-menu ul li a.active {
+            background-color: #f8f9fa;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #24292e;
+            color: white;
+            padding: 2rem 0;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="/">JS-Free Marketplace</a>
+                </div>
+
+                <nav>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/static/login.html">Login</a></li>
+                        <li><a href="/static/register.html">Register</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="flash-messages">
+            <div class="flash">This is a static preview. Flask backend is not running.</div>
+        </div>
+
+        <main>
+            <div id="content-placeholder">
+                <!-- Content will be injected here by JavaScript -->
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 JS-Free Marketplace. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // This script is only for the static preview
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if there's a hash in the URL (for static demo pages)
+            if (window.location.hash) {
+                const pageName = window.location.hash.substring(1);
+                loadStaticContent(pageName);
+            }
+        });
+
+        function loadStaticContent(pageName) {
+            // In a real app, this would fetch the content from the server
+            // For our static demo, we're just setting placeholder content
+            const contentPlaceholder = document.getElementById('content-placeholder');
+
+            if (contentPlaceholder) {
+                contentPlaceholder.innerHTML = `<h1>${pageName}</h1><p>This is a static preview of the ${pageName} page. The dynamic content would normally be rendered by Flask.</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
